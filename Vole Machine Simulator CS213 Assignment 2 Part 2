@@ -1,5 +1,3 @@
-Vole Machine Simulator CS213 Assignment 2 Part 2
-
 Overview
 
 An object oriented C++ simulator and GUI application for the Vole Machine Architecture This simulator executes Vole machine instruction sets manages 16 Registers R0 RF 256 bytes of Memory 0x00 0xFF program counter PC instruction register IR and displays output written to the memory mapped screen output address 0xFF
