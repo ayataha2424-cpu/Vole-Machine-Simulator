@@ -149,7 +149,7 @@ void CPU::execute(Memory& mem) {
         }
         case 'A': { // Rotate register R right Y times (using ALU)
             int val = hexToInt(registers.getRegister(r));
-            int res = alu.rotateRight(val, y); // تم التعديل لتمرير y بدلاً من x
+            int res = alu.rotateRight(val, y); 
             registers.setRegister(r, res);
             break;
         }
