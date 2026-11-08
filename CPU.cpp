@@ -180,8 +180,17 @@ void CPU::step(Memory& mem) {
 }
 
 void CPU::run(Memory& mem) {
-    while (!halted) {
+    int maxSteps = 10000; 
+    int currentSteps = 0;
+
+    while (!halted && currentSteps < maxSteps) {
         step(mem);
+        currentSteps++;
+    }
+
+    if (currentSteps >= maxSteps) {
+        halted = true;
+        std::cout << "\n[WARNING] CPU halted: Maximum execution steps (" << maxSteps << ") reached. Infinite loop detected.\n";
     }
 }
 
