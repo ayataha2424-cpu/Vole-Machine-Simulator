@@ -119,41 +119,41 @@ void CPU::execute(Memory& mem) {
             registers.setRegister(r, res);
             break;
         }
-        case '6': { // Add contents of X and Y as floating-point and put in R (using ALU)
+        case '6': { 
             int val1 = hexToInt(registers.getRegister(x));
             int val2 = hexToInt(registers.getRegister(y));
             int res = alu.addFloat(val1, val2);
             registers.setRegister(r, res);
             break;
         }
-        case '7': { // Bitwise OR of X and Y, put in R (using ALU)
+        case '7': { 
             int val1 = hexToInt(registers.getRegister(x));
             int val2 = hexToInt(registers.getRegister(y));
             int res = alu.bitwiseOr(val1, val2);
             registers.setRegister(r, res);
             break;
         }
-        case '8': { // Bitwise AND of X and Y, put in R (using ALU)
+        case '8': { 
             int val1 = hexToInt(registers.getRegister(x));
             int val2 = hexToInt(registers.getRegister(y));
             int res = alu.bitwiseAnd(val1, val2);
             registers.setRegister(r, res);
             break;
         }
-        case '9': { // Bitwise XOR of X and Y, put in R (using ALU)
+        case '9': { 
             int val1 = hexToInt(registers.getRegister(x));
             int val2 = hexToInt(registers.getRegister(y));
             int res = alu.bitwiseXor(val1, val2);
             registers.setRegister(r, res);
             break;
         }
-        case 'A': { // Rotate register R right X times (using ALU)
+        case 'A': { // Rotate register R right Y times (using ALU)
             int val = hexToInt(registers.getRegister(r));
-            int res = alu.rotateRight(val, x);
+            int res = alu.rotateRight(val, y); // تم التعديل لتمرير y بدلاً من x
             registers.setRegister(r, res);
             break;
         }
-        case 'B': { // Jump to address XY if content of R equals content of register 0
+        case 'B': { 
             int rVal = hexToInt(registers.getRegister(r));
             int r0Val = hexToInt(registers.getRegister(0));
             if (rVal == r0Val) {
@@ -161,7 +161,7 @@ void CPU::execute(Memory& mem) {
             }
             break;
         }
-        case 'C': { // Halt
+        case 'C': { 
             halted = true;
             break;
         }
