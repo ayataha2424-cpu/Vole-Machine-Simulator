@@ -1,11 +1,11 @@
 //====================================================================================
-//Part 2==
-//STUDENT NAME: Aya Taha Esmail     ||| ID: 20251069 ||| section: S17, S18 |||AI-Generated Designs, Comparison, Final Design
-//STUDENT NAME: Ziad Ahmed Osman    ||| ID: 20251166 ||| section: S17, S18 |||Introduction, Vole Machine Architecture, and Vole Programs
-//STUDENT NAME:Habiba Essam Abo El Fotoh ||| ID: 20250187 |||section: s15,s16 |||Presentation Video, Report Compilation, and Formatting
-//STUDENT NAME: Nada Said Ahmed   |||ID: 20251453 ||| section: S17, S18 |||Initial Design, Classes, and UMLDiagram
-//===================================================================================
-//===================================================================================
+// Part 2
+// STUDENT NAME: Aya Taha Esmail         ||| ID: 20251069 ||| section: S17, S18 ||| AI-Generated Designs, Comparison, Final Design
+// STUDENT NAME: Ziad Ahmed Osman        ||| ID: 20251166 ||| section: S17, S18 ||| Introduction, Vole Machine Architecture, and Vole Programs
+// STUDENT NAME: Habiba Essam Abo El Fotoh ||| ID: 20250187 ||| section: S15, S16 ||| Presentation Video, Report Compilation, and Formatting
+// STUDENT NAME: Nada Said Ahmed         ||| ID: 20251453 ||| section: S17, S18 ||| Initial Design, Classes, and UML Diagram
+//====================================================================================
+
 #include <iostream>
 #include <vector>
 #include <string>
@@ -63,7 +63,6 @@ int main() {
 
             if (!program.empty()) {
                 if (loader.loadIntoMemory(mem, program, startAddr)) {
-                 
                     cpu.reset();
                     cpu.setPC(startAddr);
                     cout << "[Info] Program loaded and stored in memory successfully!\n";
@@ -78,7 +77,7 @@ int main() {
 
                     if (execMode == 1) {
                         cout << "\n--- Starting Step-by-Step Execution ---\n";
-                        cin.ignore(numeric_limits<streamsize>::max(), '\n');ص ا
+                        cin.ignore(numeric_limits<streamsize>::max(), '\n'); 
 
                         while (!cpu.isHalted()) {
                             cpu.step(mem);
@@ -97,7 +96,6 @@ int main() {
                         mem.displayMemory();
                     }
 
-                
                     if (!cpu.getScreenOutput().empty()) {
                         cout << "\n--- Final Screen Output (0xFF) ---\n" << cpu.getScreenOutput();
                     }
