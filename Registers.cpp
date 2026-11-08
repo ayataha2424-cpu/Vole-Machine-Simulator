@@ -1,6 +1,6 @@
 #include "Registers.h"
 #include <cstdio>
-
+#include <cctype>
 Registers::Registers() {
     for (int i = 0; i < 16; ++i) {
         registers[i] = "00";
@@ -9,7 +9,11 @@ Registers::Registers() {
 
 void Registers::setRegister(int index, std::string val) {
     if (index >= 0 && index < 16) {
-        registers[index] = val;
+        if (val.length() == 2 && isxdigit(val[0]) && isxdigit(val[1])) {
+            registers[index] = std::string(1, toupper(val[0])) + std::string(1, toupper(val[1]));
+        } else {
+            registers[index] = "00"; 
+        }
     }
 }
 
@@ -31,7 +35,7 @@ std::string Registers::getRegister(int index) const {
 void Registers::displayRegisters() const {
     std::cout << "\n--- Registers State ---\n";
     for (int i = 0; i < 16; ++i) {
-        std::cout << "R" << std::uppercase << std::hex << i << std::dec << ": " << registers[i] << "\n";
+        std::cout << "R" << std::uppercase << std::hex << i << std::dec << std::nouppercase << ": " << registers[i] << "\n";
     }
     std::cout << "-----------------------\n";
 }
