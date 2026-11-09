@@ -1,9 +1,5 @@
-Program 14:XOR
-
 200D
 210A
-30FF
-31FF
 9201
 32FF
 C000
