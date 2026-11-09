@@ -1,9 +1,9 @@
-Program 3: ROTATE
+Program 3:
 
-2081 ; R0 = 81
-30FF ; Display R0
-A002 ; Rotate R0 Right twice
-30FF ; Display R0
-C000 ; Halt
-
-the output is 60
+2006
+210A
+7201
+8301
+32FF
+33FF
+C000

@@ -1,11 +1,7 @@
-Program 2: OR Operation
+Program 2:
 
-2009    ; R0 = 9
-2106    ; R1 = 6
-30FF    ; Display R0
-31FF    ; Display R1
-7201    ; R2 = R0 OR R1
-32FF    ; Display R2
-C000    ; Halt
-
-the output is 15
+203F
+2102
+7201
+3200
+C000
