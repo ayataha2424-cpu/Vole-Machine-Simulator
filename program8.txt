@@ -1,9 +1,0 @@
-Program 3: ROTATE
-
-2081 ; R0 = 81
-30FF ; Display R0
-A002 ; Rotate R0 Right twice
-30FF ; Display R0
-C000 ; Halt
-
-the output is 60
