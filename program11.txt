@@ -1,0 +1,8 @@
+;Program 11: Load two values, get their XOR and Rotate 1 bit to the right.
+
+200A ; R0 = 10
+2108 ; R1 = 08 
+9A01 ; RA = R0 XOR R1 
+AA01 ; Rotate RA Right
+3AFF ; Display RA
+C000 ; Halt
