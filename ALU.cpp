@@ -3,11 +3,11 @@
 #include <cstdlib>
 #include <cmath>
 
-uint8_t ALU::addinteger(uint8_t a , uint8_t b) {
+uint8_t ALU::addInteger(uint8_t a , uint8_t b) {
     result = a+b;
     return result;
 }
-uint8_t ALU::addfloating(uint8_t a , uint8_t b) {
+uint8_t ALU::addFloat(uint8_t a , uint8_t b) {
 
     int signA = (a>>7) & 1;
     int expA = ((a>>4) & 7)-4;
@@ -59,19 +59,19 @@ uint8_t ALU::addfloating(uint8_t a , uint8_t b) {
     return result;
 
 }
-uint8_t ALU::bitwiseand(uint8_t a , uint8_t b) {
+uint8_t ALU::bitwiseAnd(uint8_t a , uint8_t b) {
     result = a & b;
     return result;
 }
-uint8_t ALU::bitwiseor(uint8_t a , uint8_t b) {
+uint8_t ALU::bitwiseOr(uint8_t a , uint8_t b) {
     result = a | b;
     return result;
 }
-uint8_t ALU::bitwisexor(uint8_t a , uint8_t b) {
+uint8_t ALU::bitwiseXor(uint8_t a , uint8_t b) {
     result = a ^ b;
     return result;
 }
-uint8_t ALU::rotateright(uint8_t value, uint8_t steps) {
+uint8_t ALU::rotateRight(uint8_t value, uint8_t steps) {
     steps%=8;
     result = (value >> steps) | (value << (8-steps));
     return result;
