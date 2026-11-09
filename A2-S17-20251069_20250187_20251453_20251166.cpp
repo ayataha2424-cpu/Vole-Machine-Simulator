@@ -1,9 +1,10 @@
 //====================================================================================
 // Part 2
-// STUDENT NAME: Aya Taha Esmail         ||| ID: 20251069 ||| section: S17, S18 ||| AI-Generated Designs, Comparison, Final Design
-// STUDENT NAME: Ziad Ahmed Osman        ||| ID: 20251166 ||| section: S17, S18 ||| Introduction, Vole Machine Architecture, and Vole Programs
-// STUDENT NAME: Habiba Essam Abo El Fotoh ||| ID: 20250187 ||| section: S15, S16 ||| Presentation Video, Report Compilation, and Formatting
-// STUDENT NAME: Nada Said Ahmed         ||| ID: 20251453 ||| section: S17, S18 ||| Initial Design, Classes, and UML Diagram
+// STUDENT NAME: Aya Taha Esmail         ||| ID: 20251069 ||| section: S17, S18 ||| Registers.h, Registers.cpp, Instructions.h, Instructions.cpp
+// STUDENT NAME: Ziad Ahmed Osman        ||| ID: 20251166 ||| section: S17, S18 ||| CPU.h, CPU.cpp
+// STUDENT NAME: Habiba Essam Abo El Fotoh ||| ID: 20250187 ||| section: S15, S16 ||| ALU.h, ALU.cpp
+// STUDENT NAME: Nada Said Ahmed         ||| ID: 20251453 ||| section: S17, S18 ||| Memory.h, Memory.cpp, ProgramLoader.h, ProgramLoader.cpp
+//A2-S17-20251069_20250187_20251453_20251166.cpp, gui/CMakeLists.txt, gui/main.cpp, gui/mainwindow.h, gui/mainwindow.cpp
 //====================================================================================
 
 #include <iostream>
