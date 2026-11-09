@@ -1,0 +1,7 @@
+; Program 15: Subtract 4 from 9 using Two's Complement.
+
+2009 ; R0 = 09
+21FC ; R1 = -4 (FC)
+5201 ; R2 = R0 + R1
+3200 ; Display R2
+C000 ; Halt

@@ -19,6 +19,7 @@ class QLineEdit;
 class QPlainTextEdit;
 class QPushButton;
 class QTableWidget;
+struct Theme;
 
 class MainWindow : public QMainWindow
 {
@@ -38,6 +39,8 @@ private slots:
 
 private:
     void buildUi();
+    void buildThemeMenu();                 // Theme menu: Dark / Light / Retro
+    void applyTheme(const QString &name);  // apply + remember the choice
     void snapshot();       // remember the current state (to detect changes later)
     void refreshViews();   // redraw everything, highlighting what changed
     void updateButtons();
@@ -55,6 +58,11 @@ private:
     int startAddr = 0;
     std::string prevRegs[16];
     uint8_t prevMem[256] = {0};
+
+    // ---- Theme / status ----
+    const Theme *theme = nullptr;
+    QString lastStatus;
+    bool lastStatusError = false;
 
     // ---- Widgets ----
     QLineEdit *startEdit = nullptr;

@@ -2,8 +2,12 @@
 // Written with AI assistance (allowed for the GUI). The core files are NOT modified.
 
 #include "mainwindow.h"
+#include "themes.h"
 
 #include <QAbstractItemView>
+#include <QAction>
+#include <QActionGroup>
+#include <QApplication>
 #include <QBrush>
 #include <QColor>
 #include <QComboBox>
@@ -12,15 +16,21 @@
 #include <QFont>
 #include <QFontDatabase>
 #include <QGridLayout>
+#include <QGuiApplication>
+#include <QScreen>
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QLabel>
 #include <QLineEdit>
+#include <QMenu>
+#include <QMenuBar>
 #include <QMessageBox>
 #include <QPlainTextEdit>
 #include <QPushButton>
+#include <QSettings>
 #include <QStringList>
+#include <QStyleFactory>
 #include <QTableWidget>
 #include <QVBoxLayout>
 
@@ -35,9 +45,18 @@ QString hex2(int v)
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
     setWindowTitle("Vole Machine Simulator");
+    QApplication::setStyle(QStyleFactory::create("Fusion")); // consistent look for all themes
+    // Size the window to fit the screen (so nothing is cut off on small / scaled displays).
+    if (QScreen *scr = QGuiApplication::primaryScreen()) {
+        const QRect avail = scr->availableGeometry();
+        resize(qMin(1180, int(avail.width() * 0.95)), qMin(780, int(avail.height() * 0.92)));
+    } else {
+        resize(1180, 700);
+    }
+
     buildUi();
     snapshot();
-    refreshViews();
+    buildThemeMenu(); // applies the saved theme and redraws the views
     updateButtons();
     setStatus("Ready. Enter a start address, then press 'Load Program...'.");
 }
@@ -49,14 +68,17 @@ void MainWindow::buildUi()
     QWidget *central = new QWidget(this);
     setCentralWidget(central);
     QVBoxLayout *mainLayout = new QVBoxLayout(central);
+    mainLayout->setContentsMargins(12, 8, 12, 10);
+    mainLayout->setSpacing(6);
 
     // ================= Program control (top) =================
     QGroupBox *ctrlBox = new QGroupBox("Program Control", central);
     QHBoxLayout *ctrl = new QHBoxLayout(ctrlBox);
+    ctrl->setSpacing(8);
 
     startEdit = new QLineEdit("00", ctrlBox);
     startEdit->setMaxLength(2);
-    startEdit->setFixedWidth(50);
+    startEdit->setFixedWidth(54);
     startEdit->setFont(mono);
     startEdit->setToolTip("Start address in hex. Must be even (00, 02, ..., FE).");
 
@@ -66,6 +88,11 @@ void MainWindow::buildUi()
     resetBtn = new QPushButton("Reset", ctrlBox);
     helpBtn = new QPushButton("Help", ctrlBox);
     fileLabel = new QLabel("No program loaded", ctrlBox);
+    loadBtn->setObjectName("loadBtn");
+    stepBtn->setObjectName("stepBtn");
+    runBtn->setObjectName("runBtn");
+    resetBtn->setObjectName("resetBtn");
+    helpBtn->setObjectName("helpBtn");
 
     ctrl->addWidget(new QLabel("Start address (hex, even):", ctrlBox));
     ctrl->addWidget(startEdit);
@@ -80,12 +107,15 @@ void MainWindow::buildUi()
 
     // ================= CPU box (left) =================
     QGroupBox *cpuBox = new QGroupBox("CPU", central);
-    cpuBox->setMinimumWidth(190);
+    cpuBox->setMinimumWidth(220);
     QVBoxLayout *cpuLayout = new QVBoxLayout(cpuBox);
 
     pcLabel = new QLabel(cpuBox);
     irLabel = new QLabel(cpuBox);
     stateLabel = new QLabel(cpuBox);
+    pcLabel->setObjectName("pcLabel");
+    irLabel->setObjectName("irLabel");
+    stateLabel->setObjectName("stateLabel");
     pcLabel->setFont(mono);
     irLabel->setFont(mono);
     stateLabel->setFont(mono);
@@ -97,11 +127,13 @@ void MainWindow::buildUi()
     regTable->setVerticalHeaderLabels(regNames);
     regTable->setHorizontalHeaderLabels(QStringList() << "Value");
     regTable->horizontalHeader()->setStretchLastSection(true);
-    regTable->verticalHeader()->setDefaultSectionSize(24);
+    // Rows share the available height, so all 16 registers (R0..RF) always fit.
+    regTable->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     regTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
     regTable->setSelectionMode(QAbstractItemView::NoSelection);
     regTable->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    regTable->setMinimumHeight(16 * 24 + 36);
+    regTable->verticalHeader()->setMinimumSectionSize(14);
+    regTable->setMinimumHeight(16 * 16 + 28);
     regTable->setFont(mono);
     for (int i = 0; i < 16; ++i) {
         QTableWidgetItem *item = new QTableWidgetItem("00");
@@ -112,7 +144,7 @@ void MainWindow::buildUi()
     cpuLayout->addWidget(pcLabel);
     cpuLayout->addWidget(irLabel);
     cpuLayout->addWidget(stateLabel);
-    cpuLayout->addWidget(regTable);
+    cpuLayout->addWidget(regTable, 1);
 
     // ================= Memory box (center) =================
     QGroupBox *memBox = new QGroupBox("Main Memory (256 cells) - row + column = address", central);
@@ -126,13 +158,16 @@ void MainWindow::buildUi()
     }
     memTable->setHorizontalHeaderLabels(cols);
     memTable->setVerticalHeaderLabels(rows);
-    memTable->horizontalHeader()->setDefaultSectionSize(38);
-    memTable->verticalHeader()->setDefaultSectionSize(24);
+    // Cells stretch to fill the whole box: no empty space on the right.
+    memTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    memTable->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     memTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
     memTable->setSelectionMode(QAbstractItemView::NoSelection);
     memTable->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     memTable->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    memTable->setMinimumSize(16 * 38 + 60, 16 * 24 + 36);
+    memTable->verticalHeader()->setMinimumSectionSize(14);
+    memTable->horizontalHeader()->setMinimumSectionSize(24);
+    memTable->setMinimumSize(16 * 30 + 50, 16 * 16 + 28);
     memTable->setFont(mono);
     for (int r = 0; r < 16; ++r) {
         for (int c = 0; c < 16; ++c) {
@@ -144,6 +179,7 @@ void MainWindow::buildUi()
     memLayout->addWidget(memTable);
 
     QHBoxLayout *middle = new QHBoxLayout();
+    middle->setSpacing(10);
     middle->addWidget(cpuBox);
     middle->addWidget(memBox, 1);
 
@@ -151,14 +187,17 @@ void MainWindow::buildUi()
     QGroupBox *screenBox = new QGroupBox("Screen (output written to address FF)", central);
     QVBoxLayout *screenLayout = new QVBoxLayout(screenBox);
     screenView = new QPlainTextEdit(screenBox);
+    screenView->setObjectName("screenView");
     screenView->setReadOnly(true);
     screenView->setFont(mono);
-    screenView->setMaximumHeight(100);
+    screenView->setMinimumHeight(70);
     screenLayout->addWidget(screenView);
 
     // ================= Edit values (bottom right) =================
     QGroupBox *editBox = new QGroupBox("Overwrite a Register or a Memory Cell", central);
     QGridLayout *grid = new QGridLayout(editBox);
+    grid->setHorizontalSpacing(10);
+    grid->setVerticalSpacing(8);
 
     regCombo = new QComboBox(editBox);
     for (int i = 0; i < 16; ++i)
@@ -192,11 +231,13 @@ void MainWindow::buildUi()
     grid->addWidget(setMemBtn, 1, 4);
 
     QHBoxLayout *bottom = new QHBoxLayout();
+    bottom->setSpacing(10);
     bottom->addWidget(screenBox, 1);
     bottom->addWidget(editBox, 2);
 
     // ================= Status line =================
     statusLabel = new QLabel(central);
+    statusLabel->setObjectName("statusLabel");
     statusLabel->setWordWrap(true);
 
     mainLayout->addWidget(ctrlBox);
@@ -214,6 +255,50 @@ void MainWindow::buildUi()
     connect(setMemBtn, &QPushButton::clicked, this, &MainWindow::onSetMemory);
 }
 
+// "Theme" menu with Dark / Light / Retro. The choice is saved and restored on the next launch.
+void MainWindow::buildThemeMenu()
+{
+    QMenu *menu = menuBar()->addMenu("&Theme");
+    QActionGroup *group = new QActionGroup(this);
+    group->setExclusive(true);
+
+    const QString saved = QSettings("FCAI", "VoleGUI").value("theme", "Dark").toString();
+    for (const Theme &t : allThemes()) {
+        QAction *action = menu->addAction(t.name);
+        action->setCheckable(true);
+        group->addAction(action);
+        const QString name = t.name;
+        connect(action, &QAction::triggered, this, [this, name]() { applyTheme(name); });
+        if (name == saved)
+            action->setChecked(true);
+    }
+    if (!group->checkedAction() && !group->actions().isEmpty())
+        group->actions().first()->setChecked(true);
+
+    applyTheme(saved);
+}
+
+void MainWindow::applyTheme(const QString &name)
+{
+    const Theme &t = themeByName(name);
+    theme = &t;
+    qApp->setStyleSheet(buildQss(t));
+    // Fixed row height (from the font) so all 16 registers always fit, in every theme.
+    regTable->ensurePolished();
+    regTable->horizontalHeader()->ensurePolished();
+    const int rowH = regTable->fontMetrics().height() + 5;
+    regTable->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+    regTable->verticalHeader()->setMinimumSectionSize(10);
+    regTable->verticalHeader()->setDefaultSectionSize(rowH);
+    regTable->setMinimumHeight(regTable->horizontalHeader()->sizeHint().height()
+                               + 16 * rowH + 2 * regTable->frameWidth() + 6);
+    QSettings("FCAI", "VoleGUI").setValue("theme", t.name);
+
+    refreshViews(); // re-color table cells for the new theme
+    if (!lastStatus.isEmpty())
+        setStatus(lastStatus, lastStatusError);
+}
+
 // Remember the current machine state so refreshViews() can highlight changes.
 void MainWindow::snapshot()
 {
@@ -225,9 +310,13 @@ void MainWindow::snapshot()
 
 void MainWindow::refreshViews()
 {
-    const QBrush changedBg(QColor(255, 235, 130)); // changed since last snapshot
-    const QBrush pcBg(QColor(160, 205, 255));      // cells at the PC (next instruction)
-    const QBrush black(Qt::black);
+    const Theme &t = theme ? *theme : allThemes().front();
+    const QBrush changedBg{QColor(t.changedBg)};
+    const QBrush changedFg{QColor(t.changedFg)};
+    const QBrush pcBg{QColor(t.pcBg)};
+    const QBrush pcFg{QColor(t.pcFg)};
+    const QBrush zeroFg{QColor(t.zeroFg)};
+    const QBrush nonzeroFg{QColor(t.nonzeroFg)};
     const int pc = cpu.getPC();
 
     pcLabel->setText("PC: " + QString("%1").arg(pc, 2, 16, QChar('0')).toUpper());
@@ -237,17 +326,22 @@ void MainWindow::refreshViews()
     else
         stateLabel->setText(cpu.isHalted() ? "State: HALTED" : "State: ready");
 
-    // Registers
+    // Registers: changed = highlighted, "00" = dimmed, other values stand out
     for (int i = 0; i < 16; ++i) {
         const std::string v = cpu.getRegister(i);
         QTableWidgetItem *item = regTable->item(i, 0);
         item->setText(QString::fromStdString(v));
         const bool changed = (v != prevRegs[i]);
-        item->setBackground(changed ? changedBg : QBrush());
-        item->setForeground(changed ? black : QBrush());
+        if (changed) {
+            item->setBackground(changedBg);
+            item->setForeground(changedFg);
+        } else {
+            item->setBackground(QBrush());
+            item->setForeground(v == "00" ? zeroFg : nonzeroFg);
+        }
     }
 
-    // Memory
+    // Memory: changed = highlighted, cells at the PC = marked, "00" dimmed, others stand out
     for (int a = 0; a < 256; ++a) {
         const uint8_t v = mem.read(static_cast<uint8_t>(a));
         QTableWidgetItem *item = memTable->item(a / 16, a % 16);
@@ -256,13 +350,13 @@ void MainWindow::refreshViews()
         const bool atPc = loaded && (a == pc || a == pc + 1);
         if (changed) {
             item->setBackground(changedBg);
-            item->setForeground(black);
+            item->setForeground(changedFg);
         } else if (atPc) {
             item->setBackground(pcBg);
-            item->setForeground(black);
+            item->setForeground(pcFg);
         } else {
             item->setBackground(QBrush());
-            item->setForeground(QBrush());
+            item->setForeground(v == 0 ? zeroFg : nonzeroFg);
         }
     }
 
@@ -280,8 +374,12 @@ void MainWindow::updateButtons()
 
 void MainWindow::setStatus(const QString &text, bool error)
 {
-    statusLabel->setStyleSheet(error ? "color: #c0392b; font-weight: bold;"
-                                     : "color: #1e8449;");
+    lastStatus = text;
+    lastStatusError = error;
+    const QString color = theme ? (error ? theme->err : theme->ok)
+                                : (error ? QString("#c0392b") : QString("#1e8449"));
+    statusLabel->setStyleSheet(QString("color: %1; %2")
+                                   .arg(color, error ? "font-weight: bold;" : ""));
     statusLabel->setText(text);
 }
 
@@ -439,8 +537,10 @@ void MainWindow::onHelp()
         "2. Press 'Load Program...' and choose a text file of Vole instructions.\n"
         "   Invalid programs are rejected with a message.\n"
         "3. Press 'Step' to run one instruction, or 'Run' to run until HALT.\n"
-        "4. Yellow cells changed in the last action; blue cells are at the PC.\n"
+        "4. Yellow/amber cells changed in the last action; blue (bright green in Retro) "
+        "cells are at the PC. Zero cells are dimmed.\n"
         "5. Use the bottom-right panel to overwrite a register or a memory cell.\n"
         "6. Anything stored to address FF appears in the Screen box.\n"
-        "7. 'Reset' restarts the program from its start address (memory is kept).");
+        "7. 'Reset' restarts the program from its start address (memory is kept).\n"
+        "8. Use the 'Theme' menu to switch between Dark, Light and Retro.");
 }

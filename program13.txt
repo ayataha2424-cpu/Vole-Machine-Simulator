@@ -1,0 +1,13 @@
+; Program 13: Load 6 and 7, get their AND, add 2, then combine with XOR and OR results
+2006 ; R0 = 06
+2107 ; R1 = 07
+8201 ; R2 = R0 AND R1 (6)
+2302 ; R3 = 02
+5223 ; R2 = R2 + R3 (8)
+4024 ; move R2 to R4
+9501 ; R5 = R0 XOR R1 (1)
+7601 ; R6 = R0 + R1 (7)
+5745 ; R7 = R4 + R5 (9)
+5876 ; R8 = R7 + R6 (16)
+38FF ; Display R8 
+C000 ; halt

@@ -15,6 +15,7 @@ qt_add_executable(VoleGUI
     main.cpp
     mainwindow.cpp
     mainwindow.h
+    themes.h
     ${CORE_DIR}/CPU.cpp
     ${CORE_DIR}/ALU.cpp
     ${CORE_DIR}/Instructions.cpp
