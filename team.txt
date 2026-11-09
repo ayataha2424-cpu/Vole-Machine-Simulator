@@ -1,0 +1,18 @@
+SECTION:      S17
+ZIP_FILE:     CS213_A2_Part3_S17_20251069_20250187_20251453_20251166.zip
+
+ID1:          20251069
+NAME1:        Aya Taha Esmail
+FILES1:       Registers.h, Registers.cpp, Instructions.h, Instructions.cpp, A2-S17-20251069_20250187_20251453_20251166.cpp, gui/CMakeLists.txt, gui/main.cpp, gui/mainwindow.h, gui/mainwindow.cpp
+
+ID2:          20250187
+NAME2:        Habiba Essam Abo El Fotoh
+FILES2:       ALU.h, ALU.cpp
+
+ID3:          20251453
+NAME3:        Nada Said Ahmed
+FILES3:       Memory.h, Memory.cpp, ProgramLoader.h, ProgramLoader.cpp
+
+ID4:          20251166
+NAME4:        Ziad Ahmed Osman
+FILES4:       CPU.h, CPU.cpp
